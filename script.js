@@ -1,42 +1,49 @@
-const apiKey = 'a6077fb37d6724ae64d6b4c4421724b4';
-const weatherContainer = document.getElementById('weather');
+// API key
+const apiKey = 'YOUR_API_KEY_HERE';
 
-async function getWeather() {
-    try {
+// Select elements
+const cityInput = document.querySelector('#city-input');
+const searchBtn = document.querySelector('#search-btn');
+const weatherInfo = document.querySelector('#weather-info');
+const cityName = document.querySelector('#city-name');
+const temperature = document.querySelector('#temperature');
+const conditions = document.querySelector('#conditions');
+const humidity = document.querySelector('#humidity');
+const windSpeed = document.querySelector('#wind-speed');
+const weatherIcon = document.querySelector('#weather-icon');
 
-        const response = await fetch(`https://api.weatherstack.com/current?access_key=${apiKey}&query=New York`);
-        const data = await response.json();
-        displayWeather(data);
-    } catch (error) {
-        weatherContainer.innerHTML = `Error fetching weather data`;
+// Add event listener to search button
+searchBtn.addEventListener('click', () => {
+    const city = cityInput.value.trim();
+    if (city) {
+        fetchWeatherData(city);
     }
+});
+
+// Fetch weather data from API
+function fetchWeatherData(city) {
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
+    fetch(url)
+        .then(response => response.json())
+        .then(data => displayWeatherData(data))
+        .catch(error => console.error('Error:', error));
 }
 
-function displayWeather(data) {
-    if (data.error) {
-        weatherContainer.innerHTML = `${data.error.info}`;
-    } else {
-        const { temperature, weather_descriptions } = data.current;
-        const { location } = data.current;
+// Display weather data
+function displayWeatherData(data) {
+    const city = data.name;
+    const temp = data.main.temp;
+    const condition = data.weather[0].description;
+    const humid = data.main.humidity;
+    const wind = data.wind.speed;
+    const icon = data.weather[0].icon;
 
-        let clothingAdvice = '';
-        if (temperature < 10) {
-            clothingAdvice = 'Wear heavy clothing like a coat and scarf.';
-        } else if (temperature < 20) {
-            clothingAdvice = 'A light jacket should be fine.';
-        } else {
-            clothingAdvice = 'Light clothing is recommended.';
-        }
+    cityName.textContent = city;
+    temperature.textContent = `${temp}°C`;
+    conditions.textContent = condition;
+    humidity.textContent = `Humidity: ${humid}%`;
+    windSpeed.textContent = `Wind Speed: ${wind} m/s`;
+    weatherIcon.src = `https://openweathermap.org/img/wn/${icon}@2x.png`;
 
-        weatherContainer.innerHTML = `
-            ${location.name}, ${location.country}
-            <hr>
-            ${weather_descriptions[0]}
-            ${temperature}°C
-            <br>
-            ${clothingAdvice}
-        `;
-    }
+    weatherInfo.classList.remove('hidden');
 }
-
-getWeather();
