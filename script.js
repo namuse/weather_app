@@ -1,49 +1,66 @@
-// API key
-const apiKey = 'YOUR_API_KEY_HERE';
+const apiKey = "6d8a37dd698055264b709964d3506603";
+const apiUrl = "https://api.openweathermap.org/data/2.5/weather?units=metric&q=";
 
-// Select elements
-const cityInput = document.querySelector('#city-input');
-const searchBtn = document.querySelector('#search-btn');
-const weatherInfo = document.querySelector('#weather-info');
-const cityName = document.querySelector('#city-name');
-const temperature = document.querySelector('#temperature');
-const conditions = document.querySelector('#conditions');
-const humidity = document.querySelector('#humidity');
-const windSpeed = document.querySelector('#wind-speed');
-const weatherIcon = document.querySelector('#weather-icon');
+const searchBox = document.querySelector(".search input");
+const searchBtn = document.querySelector(".search button");
+const weatherIcon = document.querySelector(".weather-icon");
 
-// Add event listener to search button
-searchBtn.addEventListener('click', () => {
-    const city = cityInput.value.trim();
-    if (city) {
-        fetchWeatherData(city);
+async function checkWeather(city) {
+    try {
+        const response = await fetch(apiUrl + city + `&appid=${apiKey}`);
+
+        // Check if the response is successful
+        if (!response.ok) {
+            throw new Error(`City not found: ${city}`);
+        }
+
+        const data = await response.json();
+
+        // Update the UI with weather data
+        document.querySelector(".city").innerHTML = data.name;
+        document.querySelector(".temp").innerHTML = Math.round(data.main.temp) + "°C";
+        document.querySelector(".humidity").innerHTML = data.main.humidity + "%";
+
+        // Update the weather icon based on the weather condition
+        switch (data.weather[0].main) {
+            case "Clouds":
+                weatherIcon.src = "images/clouds.png";
+                document.querySelector(".advice").innerHTML = "It might be a bit cloudy. A light jacket is recommended.";
+                break;
+            case "Clear":
+                weatherIcon.src = "images/clear.png";
+                document.querySelector(".advice").innerHTML = "Sunny day! Wear light and comfortable clothes.";
+                break;
+            case "Rain":
+                weatherIcon.src = "images/rain.png";
+                document.querySelector(".advice").innerHTML = "Don't forget your umbrella and waterproof clothing.";
+                break;
+            case "Drizzle":
+                weatherIcon.src = "images/drizzle.png";
+                document.querySelector(".advice").innerHTML = "Light rain outside, a raincoat or umbrella will help.";
+                break;
+            case "Mist":
+                weatherIcon.src = "images/mist.png";
+                document.querySelector(".advice").innerHTML = "Visibility is low due to mist, drive safely and wear warm clothes.";
+                break;
+            default:
+                weatherIcon.src = "images/default.png"; // Optional: a default icon
+                document.querySelector(".advice").innerHTML = "Check the weather and dress comfortably.";
+                break;
+        }
+
+        // Show the weather section and hide the error message
+        document.querySelector(".weather").style.display = "block";
+        document.querySelector(".error").style.display = "none";
+
+    } catch (error) {
+        console.error("Error fetching weather data:", error);
+        alert(error.message); // Alert the user if there's an error
+        document.querySelector(".weather").style.display = "none"; // Hide weather section on error
+        document.querySelector(".error").style.display = "block"; // Show error message
     }
+}
+
+searchBtn.addEventListener("click", () => {
+    checkWeather(searchBox.value); // Use 'value' instead of 'Value'
 });
-
-// Fetch weather data from API
-function fetchWeatherData(city) {
-    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`;
-    fetch(url)
-        .then(response => response.json())
-        .then(data => displayWeatherData(data))
-        .catch(error => console.error('Error:', error));
-}
-
-// Display weather data
-function displayWeatherData(data) {
-    const city = data.name;
-    const temp = data.main.temp;
-    const condition = data.weather[0].description;
-    const humid = data.main.humidity;
-    const wind = data.wind.speed;
-    const icon = data.weather[0].icon;
-
-    cityName.textContent = city;
-    temperature.textContent = `${temp}°C`;
-    conditions.textContent = condition;
-    humidity.textContent = `Humidity: ${humid}%`;
-    windSpeed.textContent = `Wind Speed: ${wind} m/s`;
-    weatherIcon.src = `https://openweathermap.org/img/wn/${icon}@2x.png`;
-
-    weatherInfo.classList.remove('hidden');
-}
