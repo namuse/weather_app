@@ -44,7 +44,7 @@ async function checkWeather(city) {
                 document.querySelector(".advice").innerHTML = "Visibility is low due to mist, drive safely and wear warm clothes.";
                 break;
             default:
-                weatherIcon.src = "images/default.png"; // Optional: a default icon
+                weatherIcon.src = "images/default.png"; 
                 document.querySelector(".advice").innerHTML = "Check the weather and dress comfortably.";
                 break;
         }
@@ -62,5 +62,5 @@ async function checkWeather(city) {
 }
 
 searchBtn.addEventListener("click", () => {
-    checkWeather(searchBox.value); // Use 'value' instead of 'Value'
+    checkWeather(searchBox.value); 
 });
